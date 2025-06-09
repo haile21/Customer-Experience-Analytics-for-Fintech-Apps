@@ -19,17 +19,7 @@ Help three major Ethiopian banks improve their mobile applications by:
 - **Bank of Abyssinia (BOA)**
 - **Dashen Bank**
 
----
-
-##  Timeline
-
-| Milestone            | Date & Time (UTC)             |
-|----------------------|-------------------------------|
-| Challenge Intro       | Wed, 04 June 2024 – 8:00 AM   |
-| Interim Submission    | Sun, 08 June 2024 – 8:00 PM   |
-| Final Submission      | Tue, 10 June 2024 – 8:00 PM   |
-
----
+--- 
 
 ##  Tasks and Deliverables
 
