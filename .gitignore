@@ -3,8 +3,15 @@ __pycache__/
 *.py[cod]
 *$py.class
 
-# C extensions
-*.so
+ #  Ignore the entire data folder
+data/
+
+# # Ignore all CSV files (anywhere in the project)
+*.csv
+.idea
+
+# Ignore Jupyter Notebook checkpoints
+**/.ipynb_checkpoints/
 
 # Distribution / packaging
 .Python
