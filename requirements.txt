@@ -1,6 +1,6 @@
 google_play_scraper
 pandas
-oracledb
+#oracledb
 matplotlib
 #vaderSentiment
 scikit-learn
