@@ -1,0 +1,7 @@
+google_play_scraper
+pandas
+#oracledb
+matplotlib
+#vaderSentiment
+scikit-learn
+seaborn
