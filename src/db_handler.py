@@ -44,7 +44,7 @@ class PostgresDB:
         with self.conn.cursor() as cursor:
             bank_ids = {}
 
-            for bank in df['bank'].unique():
+            for bank in df['bank_name'].unique():
                 try:
                     cursor.execute(
                         "INSERT INTO banks (bank_name) VALUES (%s) RETURNING bank_id",
@@ -65,7 +65,7 @@ class PostgresDB:
                     ) VALUES (%s, %s, %s, %s, %s, %s, %s)
                     """,
                     [
-                        bank_ids[row['bank']],
+                        bank_ids[row['bank_name']],
                         row['review'],
                         row['rating'],
                         row['date'],
