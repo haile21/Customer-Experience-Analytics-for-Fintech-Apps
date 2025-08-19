@@ -1,6 +1,7 @@
 from datetime import datetime
 from pathlib import Path
 
+import logging
 import matplotlib.pyplot as plt
 import pandas as pd
 import seaborn as sns
@@ -11,6 +12,10 @@ from wordcloud import WordCloud
 
 def plot_sentiment_distribution(df: pd.DataFrame, output_dir: Path):
     """Bar plot of sentiment distribution by bank."""
+    if df.empty:
+        logging.warning("plot_sentiment_distribution: DataFrame is empty, skipping plot.")
+        return
+
     plt.figure(figsize=(12, 6))
     ax = sns.countplot(
         data=df,
@@ -33,8 +38,13 @@ def plot_sentiment_distribution(df: pd.DataFrame, output_dir: Path):
     plt.savefig(output_dir / "sentiment_distribution.png", dpi=300)
     plt.close()
 
+
 def plot_rating_vs_sentiment(df: pd.DataFrame, output_dir: Path):
     """Violin plot of sentiment scores by star rating."""
+    if df.empty:
+        logging.warning("plot_rating_vs_sentiment: DataFrame is empty, skipping plot.")
+        return
+
     plt.figure(figsize=(12, 6))
     sns.violinplot(
         data=df,
@@ -51,10 +61,19 @@ def plot_rating_vs_sentiment(df: pd.DataFrame, output_dir: Path):
     plt.savefig(output_dir / "rating_vs_sentiment.png", dpi=300)
     plt.close()
 
+
 def generate_wordclouds(df: pd.DataFrame, output_dir: Path):
     """Generate word clouds for each bank's reviews."""
+    if df.empty:
+        logging.warning("generate_wordclouds: DataFrame is empty, skipping wordclouds.")
+        return
+
     for bank in df['bank_name'].unique():
         text = ' '.join(df[df['bank_name'] == bank]['review'])
+        if not text.strip():
+            logging.warning(f"generate_wordclouds: No review text for {bank}, skipping.")
+            continue
+
         wordcloud = WordCloud(
             width=1200,
             height=600,
@@ -70,10 +89,15 @@ def generate_wordclouds(df: pd.DataFrame, output_dir: Path):
         plt.savefig(output_dir / f"wordcloud_{bank[:3].lower()}.png", dpi=300, bbox_inches='tight')
         plt.close()
 
+
 # --- Insight Generation ---
 
 def generate_insights(df: pd.DataFrame) -> dict:
     """Extract key insights from analyzed data."""
+    if df.empty:
+        logging.warning("generate_insights: DataFrame is empty, returning empty insights.")
+        return {'banks': {}, 'comparisons': {}}
+
     insights = {
         'banks': {},
         'comparisons': {
@@ -83,21 +107,29 @@ def generate_insights(df: pd.DataFrame) -> dict:
 
     for bank in df['bank_name'].unique():
         bank_data = df[df['bank_name'] == bank]
+        if bank_data.empty:
+            continue
+
         pos_reviews = bank_data[bank_data['sentiment_label'] == 'positive']
         neg_reviews = bank_data[bank_data['sentiment_label'] == 'negative']
 
         insights['banks'][bank] = {
-            'pos_percentage': f"{len(pos_reviews)/len(bank_data)*100:.1f}%",
-            'top_pos_keywords': pos_reviews['keywords'].explode().value_counts().head(3).index.tolist(),
-            'top_neg_keywords': neg_reviews['keywords'].explode().value_counts().head(3).index.tolist()
+            'pos_percentage': f"{len(pos_reviews)/len(bank_data)*100:.1f}%" if len(bank_data) > 0 else "0%",
+            'top_pos_keywords': pos_reviews['keywords'].explode().value_counts().head(3).index.tolist() if not pos_reviews.empty else [],
+            'top_neg_keywords': neg_reviews['keywords'].explode().value_counts().head(3).index.tolist() if not neg_reviews.empty else []
         }
 
     return insights
+
 
 # --- Markdown Report ---
 
 def generate_report(insights: dict, output_dir: Path):
     """Generate markdown report with insights and visualizations."""
+    if not insights.get('banks'):
+        logging.warning("generate_report: No insights to report, skipping file creation.")
+        return
+
     report = f"""# Fintech App Reviews Analysis Report
 Date: {datetime.now().strftime('%Y-%m-%d')}
 
@@ -112,7 +144,7 @@ Date: {datetime.now().strftime('%Y-%m-%d')}
 
     for bank, data in insights['banks'].items():
         report += f"""
-| {bank[:20]} | {insights['comparisons']['avg_sentiment'][bank]} | {data['pos_percentage']} | {', '.join(data['top_pos_keywords'])} | {', '.join(data['top_neg_keywords'])} |"""
+| {bank[:20]} | {insights['comparisons']['avg_sentiment'].get(bank, 'N/A')} | {data['pos_percentage']} | {', '.join(data['top_pos_keywords']) or 'N/A'} | {', '.join(data['top_neg_keywords']) or 'N/A'} |"""
 
     report += """
 
